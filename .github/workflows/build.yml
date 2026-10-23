@@ -1,6 +1,6 @@
-# Tests TaskHaven and builds the Android app on every push. The APK (and, when signed, the App
-# Bundle for Google Play) are under the run's "Artifacts" (Actions tab → the run → TaskHaven-apk);
-# publishing a release also attaches them there.
+# Tests TaskHaven and builds the Android app on every push. The APK is under the run's "Artifacts"
+# (Actions tab → the run → TaskHaven-apk); publishing a release also attaches it there, for people
+# to download from the Releases page.
 #
 # Optional repository secrets (Settings → Secrets and variables → Actions):
 #   ANDROID_KEYSTORE_BASE64    your signing key (tools/make-keystore.sh), so each APK installs over the last
@@ -28,11 +28,6 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Web pages filled in (privacy policy, terms, deleting an account)
-        run: |
-          if grep -l '\[Your name\]\|\[your contact email\]' docs/*.html; then
-            echo "::warning::docs/ still has [Your name] / [your contact email] to fill in before publishing on Google Play."
-          fi
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
@@ -148,24 +143,22 @@ jobs:
           chmod +x gradlew
           VERSION=$(node -p "require('../package.json').version")
           if [ -n "$TASKHAVEN_KEYSTORE" ]; then
-            ./gradlew --no-daemon assembleRelease bundleRelease
+            ./gradlew --no-daemon assembleRelease
             cp app/build/outputs/apk/release/app-release.apk "../TaskHaven-$VERSION.apk"
-            cp app/build/outputs/bundle/release/app-release.aab "../TaskHaven-$VERSION.aab"
           else
             echo "::warning::No signing key set: this is a debug build. Set ANDROID_KEYSTORE_BASE64 so updates install over it."
             ./gradlew --no-daemon assembleDebug
             cp app/build/outputs/apk/debug/app-debug.apk "../TaskHaven-$VERSION-debug.apk"
           fi
-          cd .. && ls TaskHaven-*.apk TaskHaven-*.aab 2>/dev/null | xargs sha256sum | tee SHA256SUMS.txt
+          cd .. && sha256sum TaskHaven-*.apk | tee SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
           name: TaskHaven-apk
           path: |
             TaskHaven-*.apk
-            TaskHaven-*.aab
             SHA256SUMS.txt
       - name: Attach to the release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" TaskHaven-*.apk $(ls TaskHaven-*.aab 2>/dev/null) SHA256SUMS.txt --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" TaskHaven-*.apk SHA256SUMS.txt --clobber

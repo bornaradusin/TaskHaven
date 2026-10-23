@@ -91,5 +91,5 @@ everyone make their own). Worth knowing:
   (which the server confirms by email) can't work, and whoever runs the server does them instead.
 - Back up the `db` and `files` folders.
 
-). Vikunja is a separate project (AGPL-3.0); TaskHaven uses
+Vikunja is a separate project (AGPL-3.0); TaskHaven uses
 only its public API and contains none of its code.

@@ -1,0 +1,13 @@
+node_modules/
+dist/
+release/
+.build/
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+*.keystore
+*.jks
+
+# signing keys and their base64 copies
+*.jks.base64.txt

@@ -1,0 +1,41 @@
+{
+  "name": "taskhaven",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "TaskHaven: a to-do app for families and small teams, on your own Vikunja server",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "test": "TZ=Europe/London vitest run",
+    "test:server": "TZ=Europe/London vitest run tests/server.test.ts",
+    "typecheck": "vue-tsc --noEmit",
+    "shots": "node tests/shots.mjs",
+    "e2e": "node tests/e2e.mjs",
+    "e2e:server": "node tests/e2e-server.mjs",
+    "android": "npm run build && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/local-notifications": "^8.3.1",
+    "@capacitor/status-bar": "^8.0.4",
+    "lucide-vue-next": "^1.0.0",
+    "vue": "^3.5.44",
+    "vue-router": "^5.4.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@types/node": "^22.20.5",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/test-utils": "^2.5.1",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.56.0",
+    "typescript": "5.9",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5",
+    "vue-tsc": "^3.3.13"
+  }
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A Vikunja server at home is often plain http (http://192.168.1.20:3456). The app itself only
+     allows http for addresses on the home network; anything on the internet must be https. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <!-- a home server with its own certificate, added to the phone by its owner -->
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

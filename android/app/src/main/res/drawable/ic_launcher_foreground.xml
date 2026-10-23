@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Made by tools/make-icons.py: the TaskHaven mark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:scaleX="0.34" android:scaleY="0.34" android:translateX="15.835" android:translateY="16.685">
+        <path android:pathData="M76,66 H126 A24,24 0 0 1 150,90 V140 A24,24 0 0 1 126,164 H76 A24,24 0 0 1 52,140 V90 A24,24 0 0 1 76,66 Z" android:strokeColor="#FFFFFF" android:strokeWidth="12" android:fillColor="#00000000"/>
+        <path android:pathData="M77,112 L100,135 L170,58" android:strokeColor="#FFFFFF" android:strokeWidth="17" android:fillColor="#00000000"
+            android:strokeLineCap="round" android:strokeLineJoin="round"/>
+    </group>
+</vector>

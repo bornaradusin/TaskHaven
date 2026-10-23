@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds the TaskHaven APK (and the App Bundle for Google Play, when signed) on a Linux machine
+# Builds the TaskHaven APK on a Linux machine
 # (CT108): tests, the web app, then Android.
 #   sh tools/build-apk.sh            build (Java 21, Node 22+ and the Android SDK needed)
 #   sh tools/build-apk.sh --setup    first, fetch the Android command-line tools into $ANDROID_HOME
@@ -44,12 +44,9 @@ mkdir -p "$RELEASES"
 cd android
 chmod +x gradlew
 if [ -n "${TASKHAVEN_KEYSTORE:-}" ]; then
-  ./gradlew --no-daemon assembleRelease bundleRelease
+  ./gradlew --no-daemon assembleRelease
   apk="$RELEASES/TaskHaven-$version.apk"
   cp app/build/outputs/apk/release/app-release.apk "$apk"
-  # the App Bundle, for Google Play
-  cp app/build/outputs/bundle/release/app-release.aab "$RELEASES/TaskHaven-$version.aab"
-  (cd "$RELEASES" && sha256sum "TaskHaven-$version.aab" >> SHA256SUMS.txt)
 else
   echo "No TASKHAVEN_KEYSTORE: a debug build (fine to try; set a key before sharing it)."
   ./gradlew --no-daemon assembleDebug

@@ -1,12 +1,10 @@
-// Google Play's graphics: phone screenshots (1080×1920) of the demo, and the feature graphic
+// Pictures for showing TaskHaven off: phone screenshots (1080×1920) of the demo, and a banner
 // (1024×500). Run `npm run build` first. Usage: node tools/store-graphics.mjs [out-dir]
-// (then tools/make-icons.py makes store/icon-512.png; Play wants PNGs without transparency,
-// which `python3 tools/flatten.py` sees to)
 import { chromium } from 'playwright'
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import { extname, join, resolve } from 'node:path'
-import { mkdirSync, readFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, rmSync } from 'node:fs'
 
 const out = resolve(process.argv[2] ?? 'store')
 mkdirSync(join(out, 'screenshots'), { recursive: true })
@@ -78,7 +76,9 @@ await shot('7-quick-add', '/', { before: (p) => p.getByLabel('New task').fill('T
 const darkFile = await shot('8-dark', '{Home}/list', { dark: true })
 
 // the feature graphic: the name and what it's for, beside the app
-const phone = readFileSync(await shot('_feature-phone', '/', { width: 360, height: 700 })).toString('base64')
+const phoneFile = await shot('_feature-phone', '/', { width: 360, height: 700 })
+const phone = readFileSync(phoneFile).toString('base64')
+rmSync(phoneFile)
 const icon = readFileSync(resolve('art/icon.svg'), 'utf8')
 void darkFile
 const page = await browser.newPage({ viewport: { width: 1024, height: 500 }, deviceScaleFactor: 1 })

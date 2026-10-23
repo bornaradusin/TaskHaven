@@ -155,9 +155,6 @@ def main():
     for px in (192, 512):
         icon(px).save(ROOT / f'public/icon-{px}.png')
     icon(1024).save(ROOT / 'art/icon.png')
-    # Google Play's icon: 512×512, square (Play rounds the corners itself)
-    (ROOT / 'store').mkdir(exist_ok=True)
-    icon(512, 'full').save(ROOT / 'store/icon-512.png')
     write(ROOT / 'art/icon.svg', SVG)
     print('icons made')
 

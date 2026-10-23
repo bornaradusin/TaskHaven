@@ -51,7 +51,9 @@ TaskHaven is an independent app that works with Vikunja servers. It isn't made b
 
 **Category:** Productivity
 **Tags:** To-do list, Task manager, Planner
-**Contact email:** <your contact email>
+**Website:** https://github.com/bornaradusin/TaskHaven
+**Contact email:** Play Console requires one under *Store settings → Store listing contact details*;
+it shows on the Play page only, never in the app (an address made just for the app is fine).
 **Privacy policy:** https://bornaradusin.github.io/TaskHaven/privacy.html
 
 **Graphics** (in this folder)

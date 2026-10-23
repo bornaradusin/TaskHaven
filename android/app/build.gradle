@@ -9,10 +9,10 @@ def (major, minor, patch) = pkg.version.tokenize('.').collect { it.replaceAll('[
 def keystore = System.getenv('TASKHAVEN_KEYSTORE')
 
 android {
-    namespace = "club.radusin.taskhaven"
+    namespace = "io.github.bornaradusin.taskhaven"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "club.radusin.taskhaven"
+        applicationId "io.github.bornaradusin.taskhaven"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode major * 10000 + minor * 100 + patch

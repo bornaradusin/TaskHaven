@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 // The Android app: TaskHaven's web pages (dist/) in a web view, with notifications.
 const config: CapacitorConfig = {
-  appId: 'club.radusin.taskhaven',
+  appId: 'io.github.bornaradusin.taskhaven',
   appName: 'TaskHaven',
   webDir: 'dist',
   android: {

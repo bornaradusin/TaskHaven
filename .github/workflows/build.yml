@@ -1,6 +1,6 @@
 # Tests TaskHaven and builds the Android and iPhone apps on every push. They're under the run's
-# "Artifacts" (Actions tab → the run → TaskHaven-apk, TaskHaven-ipa); publishing a release also
-# attaches them there, for people to download from the Releases page.
+# "Artifacts" (Actions tab → the run → TaskHaven-apk, TaskHaven-ipa). A push to main also puts both
+# on a draft release for package.json's version: check it, then publish it on the Releases page.
 #
 # The iPhone app (.ipa) isn't signed: people install it with AltStore, SideStore or Sideloadly,
 # which sign it with their own Apple ID.
@@ -15,8 +15,6 @@ on:
   push:
   pull_request:
   workflow_dispatch:
-  release:
-    types: [published]
 
 permissions:
   contents: write
@@ -194,21 +192,44 @@ jobs:
           name: TaskHaven-ipa
           path: TaskHaven-*.ipa
 
-  release:
-    # a published release gets both apps, with one list of their checksums
+  draft:
+    # both apps, with one list of their checksums, on a draft release to check and publish
     needs: [apk, ipa]
-    if: always() && github.event_name == 'release' && needs.apk.result == 'success'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: apps
           merge-multiple: true
-      - name: Attach to the release
-        working-directory: apps
+      - name: Draft release for this version
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          sha256sum TaskHaven-*.apk $(ls TaskHaven-*.ipa 2>/dev/null) | tee SHA256SUMS.txt
-          gh release upload "${{ github.event.release.tag_name }}" TaskHaven-*.apk $(ls TaskHaven-*.ipa 2>/dev/null) SHA256SUMS.txt --clobber
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+          cd apps
+          sha256sum TaskHaven-*.apk TaskHaven-*.ipa | tee SHA256SUMS.txt
+          FILES="$(ls TaskHaven-*.apk TaskHaven-*.ipa) SHA256SUMS.txt"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            if [ "$(gh release view "$TAG" --json isDraft -q .isDraft)" = "true" ]; then
+              # The draft's tag follows the newest build, so the source matches the apps
+              gh release edit "$TAG" --target "$GITHUB_SHA"
+              # Drop files an earlier build of this version left behind (like a debug APK)
+              for old in $(gh release view "$TAG" --json assets -q '.assets[].name'); do
+                [ -f "$old" ] || gh release delete-asset "$TAG" "$old" --yes
+              done
+              gh release upload "$TAG" $FILES --clobber
+            else
+              echo "::notice::$TAG is already published, so it was left alone. Raise the version in package.json for a new draft."
+            fi
+          else
+            # One draft at a time: a new version replaces drafts of older ones that were never published
+            for old in $(gh release list --limit 50 --json tagName,isDraft -q '.[] | select(.isDraft) | .tagName'); do
+              [ "$old" = "$TAG" ] || gh release delete "$old" --yes
+            done
+            gh release create "$TAG" $FILES --draft --target "$GITHUB_SHA" \
+              --title "TaskHaven $VERSION" --notes "TaskHaven $VERSION"
+          fi

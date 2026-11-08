@@ -1,6 +1,9 @@
-# Tests TaskHaven and builds the Android app on every push. The APK is under the run's "Artifacts"
-# (Actions tab → the run → TaskHaven-apk); publishing a release also attaches it there, for people
-# to download from the Releases page.
+# Tests TaskHaven and builds the Android and iPhone apps on every push. They're under the run's
+# "Artifacts" (Actions tab → the run → TaskHaven-apk, TaskHaven-ipa); publishing a release also
+# attaches them there, for people to download from the Releases page.
+#
+# The iPhone app (.ipa) isn't signed: people install it with AltStore, SideStore or Sideloadly,
+# which sign it with their own Apple ID.
 #
 # Optional repository secrets (Settings → Secrets and variables → Actions):
 #   ANDROID_KEYSTORE_BASE64    your signing key (tools/make-keystore.sh), so each APK installs over the last
@@ -157,8 +160,54 @@ jobs:
           path: |
             TaskHaven-*.apk
             SHA256SUMS.txt
+
+  ipa:
+    needs: [test, server]
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync ios
+      - name: Build the iPhone app
+        run: |
+          set -o pipefail
+          xcodebuild -version
+          VERSION=$(node -p "require('./package.json').version")
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -derivedDataPath "$RUNNER_TEMP/ios" -quiet \
+            MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build
+          # An .ipa is the app in a Payload folder, zipped
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$RUNNER_TEMP/ios/Build/Products/Release-iphoneos/App.app" "$RUNNER_TEMP/ipa/Payload/"
+          (cd "$RUNNER_TEMP/ipa" && zip -qry "$GITHUB_WORKSPACE/TaskHaven-$VERSION.ipa" Payload)
+          shasum -a 256 TaskHaven-*.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TaskHaven-ipa
+          path: TaskHaven-*.ipa
+
+  release:
+    # a published release gets both apps, with one list of their checksums
+    needs: [apk, ipa]
+    if: always() && github.event_name == 'release' && needs.apk.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: apps
+          merge-multiple: true
       - name: Attach to the release
-        if: github.event_name == 'release'
+        working-directory: apps
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" TaskHaven-*.apk SHA256SUMS.txt --clobber
+          GH_REPO: ${{ github.repository }}
+        run: |
+          sha256sum TaskHaven-*.apk $(ls TaskHaven-*.ipa 2>/dev/null) | tee SHA256SUMS.txt
+          gh release upload "${{ github.event.release.tag_name }}" TaskHaven-*.apk $(ls TaskHaven-*.ipa 2>/dev/null) SHA256SUMS.txt --clobber

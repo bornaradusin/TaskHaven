@@ -2,7 +2,7 @@
 
 # TaskHaven
 
-To-do lists and projects for Android, kept on your own [Vikunja](https://vikunja.io) server: one at
+To-do lists and projects for Android and iPhone, kept on your own [Vikunja](https://vikunja.io) server: one at
 home (a NAS, a Raspberry Pi, a home server), or one on the internet at an https address. Each person
 on the server sees only their own projects, and those shared with them. Share a project with your
 partner, and just the two of you see it.
@@ -40,6 +40,19 @@ with, the Vikunja project.
 
 Everything is on the server, so it's also there in Vikunja's own web pages, and in its other apps.
 
+## Installing
+
+Both apps are on the [Releases](https://github.com/bornaradusin/TaskHaven/releases) page.
+
+- **Android:** download `TaskHaven-….apk` on the phone and open it (allow installing from your
+  browser or files app when asked).
+- **iPhone and iPad** (iOS 15 or later): `TaskHaven-….ipa` isn't in the App Store, so it's installed
+  with a sideloading app that signs it with your own Apple ID:
+  [AltStore](https://altstore.io), [SideStore](https://sidestore.io) or
+  [Sideloadly](https://sideloadly.io). With a free Apple ID, apps installed this way have to be
+  refreshed every 7 days (AltStore and SideStore do it for you). The first time it reaches a server
+  on your home network, the iPhone asks to allow TaskHaven on the local network: allow it.
+
 ## How it works
 
 The app talks to the server's API (`/api/v1`, Vikunja 0.24 and later; checked against 2.7.1).
@@ -49,7 +62,7 @@ The app talks to the server's API (`/api/v1`, Vikunja 0.24 and later; checked ag
   `taskhaven`), which renews itself; on an older server without it, it uses the login's long token.
   The session is kept on the phone, never the password.
 - **Who sees what** is the server's work: TaskHaven shows what the server gives it.
-- On the phone, requests go through Android rather than the web view (`src/data/http.ts`), so a
+- On the phone, requests go through Android or iOS itself rather than the web view (`src/data/http.ts`), so a
   server at home can be plain `http://` and needs no CORS set up for the app. The app itself only
   allows `http://` for addresses on the home network (`192.168.…`, `10.…`, `….local`, Tailscale's
   `100.64–127.…`); anything else must be `https://`.

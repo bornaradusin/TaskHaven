@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """TaskHaven's icon (the "Listo" mark: a ticked box on orange), in every size and form needed:
 the Android launcher icons (adaptive, themed, and the old square and round ones), the splash,
-the notification icon, and the web/README icons. Run from the project: python3 tools/make-icons.py"""
+the notification icon, the iPhone's icon and launch screen, and the web/README icons.
+Run from the project: python3 tools/make-icons.py"""
+
+import json
 
 from pathlib import Path
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / 'android/app/src/main/res'
+ASSETS = ROOT / 'ios/App/App/Assets.xcassets'
 ORANGE = (242, 104, 58, 255)
 WHITE = (255, 255, 255, 255)
 
@@ -149,6 +153,43 @@ def main():
           '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="splash_background">#F4F4F2</color>\n    <color name="brand">#F2683A</color>\n</resources>\n')
     write(RES / 'values-night/colors.xml',
           '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="splash_background">#121315</color>\n</resources>\n')
+
+    # ---- iPhone ----
+    # the icon: square and solid (iOS rounds the corners itself)
+    appicon = ASSETS / 'AppIcon.appiconset'
+    for old in appicon.glob('*.png'):
+        old.unlink()
+    icon(1024, 'full').convert('RGB').save(appicon / 'AppIcon.png')
+    write(appicon / 'Contents.json', json.dumps({
+        'images': [{'filename': 'AppIcon.png', 'idiom': 'universal', 'platform': 'ios', 'size': '1024x1024'}],
+        'info': {'author': 'xcode', 'version': 1},
+    }, indent=2) + '\n')
+    # the launch screen (Base.lproj/LaunchScreen.storyboard): the icon, 96 pt, on the page colour, as on Android
+    splash = ASSETS / 'Splash.imageset'
+    if splash.exists():
+        for f in splash.iterdir():
+            f.unlink()
+        splash.rmdir()
+    splash_icon = ASSETS / 'SplashIcon.imageset'
+    splash_icon.mkdir(parents=True, exist_ok=True)
+    for scale in (1, 2, 3):
+        icon(96 * scale).save(splash_icon / f'SplashIcon@{scale}x.png')
+    write(splash_icon / 'Contents.json', json.dumps({
+        'images': [{'filename': f'SplashIcon@{n}x.png', 'idiom': 'universal', 'scale': f'{n}x'} for n in (1, 2, 3)],
+        'info': {'author': 'xcode', 'version': 1},
+    }, indent=2) + '\n')
+
+    def colour(hex_value: str) -> dict:
+        r, g, b = (int(hex_value[i:i + 2], 16) for i in (1, 3, 5))
+        return {'color-space': 'srgb', 'components': {'red': f'0x{r:02X}', 'green': f'0x{g:02X}', 'blue': f'0x{b:02X}', 'alpha': '1.000'}}
+
+    write(ASSETS / 'SplashBackground.colorset/Contents.json', json.dumps({
+        'colors': [
+            {'idiom': 'universal', 'color': colour('#F4F4F2')},
+            {'idiom': 'universal', 'appearances': [{'appearance': 'luminosity', 'value': 'dark'}], 'color': colour('#121315')},
+        ],
+        'info': {'author': 'xcode', 'version': 1},
+    }, indent=2) + '\n')
 
     # ---- web and README ----
     write(ROOT / 'public/icon.svg', SVG)

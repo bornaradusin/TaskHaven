@@ -1,4 +1,4 @@
-// On the phone, requests to the server go through Android itself rather than the web view: a
+// On the phone, requests to the server go through Android or iOS itself rather than the web view: a
 // server at home is often plain http (which a web view won't mix with the app's own https page),
 // and a server doesn't have to let the app's page in (CORS). It looks like fetch to the rest.
 
@@ -18,7 +18,7 @@ function bytes(b64: string): Uint8Array<ArrayBuffer> {
 }
 
 /**
- * A file as it came: base64, except that Android reads a file the server calls JSON as JSON
+ * A file as it came: base64, except that the phone reads a file the server calls JSON as JSON
  * (then it's written out again, as near the original as can be).
  */
 function fileBytes(data: unknown): Uint8Array<ArrayBuffer> {
@@ -46,7 +46,7 @@ export const nativeFetch: typeof fetch = async (input, init = {}) => {
   let dataType: 'formData' | undefined
   const body = init.body
   if (body instanceof FormData) {
-    // Android writes the parts itself (the files as base64, and names it can write)
+    // the phone writes the parts itself (the files as base64, and names it can write)
     const parts: Record<string, string>[] = []
     for (const [key, value] of body.entries()) {
       if (typeof value === 'string') parts.push({ key, value, type: 'string' })

@@ -129,7 +129,7 @@ const options = computed(() => store.projects.filter((p) => canEdit(p)))
       <label class="switch"><input type="checkbox" :checked="store.settings.notifyDue" @change="set('notifyDue', ($event.target as HTMLInputElement).checked)" /> When a task is due</label>
       <p class="help">
         For tasks assigned to you (or that you made and nobody is assigned to).
-        {{ native ? 'They come even when TaskHaven is closed, as set the last time it was open.' : 'Notifications work in the Android app.' }}
+        {{ native ? 'They come even when TaskHaven is closed, as set the last time it was open.' : 'Notifications work in the Android and iPhone apps.' }}
         What others do (assigning you, comments) shows in the bell at the top once the app has checked the server.
       </p>
     </section>

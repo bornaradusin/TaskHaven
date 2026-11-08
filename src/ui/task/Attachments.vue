@@ -1,11 +1,13 @@
 <script setup lang="ts">
 // Files on a task, kept on the server. Photos show small here; any file opens or downloads.
 import { computed, onUnmounted, ref, watch } from 'vue'
-import { Download, FileText, Paperclip, Trash2 } from 'lucide-vue-next'
+import { Download, FileText, Paperclip, Share2, Trash2 } from 'lucide-vue-next'
 import Modal from '../Modal.vue'
 import { relativeDay } from '@/logic/dates'
 import { attachmentUrl, attempt, deleteAttachment, personName, store, toast, uploadAttachment } from '@/state'
 import type { Attachment, Task } from '@/model'
+import { native } from '@/native'
+import { saveOnPhone } from '@/ui/saveFile'
 
 const props = defineProps<{ task: Task; editable: boolean }>()
 const files = computed(() => props.task.attachments)
@@ -76,6 +78,18 @@ async function open(f: Attachment) {
   await fetchFile(f)
 }
 
+/** On the phone the file goes to the share sheet: save it to Files or Photos, or send it on. */
+async function share(f: Attachment) {
+  const url = urls.value[f.id]
+  if (!url) return
+  try {
+    const blob = await (await fetch(url)).blob()
+    await saveOnPhone(f.name, blob)
+  } catch (e) {
+    if (!String((e as Error)?.message ?? e).toLowerCase().includes('cancel')) toast('Couldn’t open the file.', { error: true })
+  }
+}
+
 async function remove(f: Attachment) {
   viewing.value = null
   await attempt(() => deleteAttachment(props.task, f.id), 'File deleted.')
@@ -108,7 +122,8 @@ defineExpose({ pick: () => picker.value?.click() })
       <template #footer>
         <button v-if="editable" class="button ghost" @click="remove(viewing)"><Trash2 :size="15" /> Delete</button>
         <span class="spacer" />
-        <a v-if="urls[viewing.id]" class="button" :href="urls[viewing.id]" :download="viewing.name" target="_blank" rel="noopener"><Download :size="15" /> Download</a>
+        <button v-if="urls[viewing.id] && native" class="button" @click="share(viewing)"><Share2 :size="15" /> Save or send</button>
+        <a v-else-if="urls[viewing.id]" class="button" :href="urls[viewing.id]" :download="viewing.name" target="_blank" rel="noopener"><Download :size="15" /> Download</a>
       </template>
     </Modal>
   </section>

@@ -1,6 +1,6 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
-// The Android app: TaskHaven's web pages (dist/) in a web view, with notifications.
+// The Android and iPhone apps: TaskHaven's web pages (dist/) in a web view, with notifications.
 const config: CapacitorConfig = {
   appId: 'io.github.bornaradusin.taskhaven',
   appName: 'TaskHaven',
@@ -8,6 +8,11 @@ const config: CapacitorConfig = {
   android: {
     // the app's pages load from its own files; the server is reached through Android (data/http.ts)
     allowMixedContent: false,
+  },
+  ios: {
+    // the page runs under the status bar and the home bar, and keeps clear of them itself
+    // (env(safe-area-inset-*) in styles.css), as on Android
+    contentInset: 'never',
   },
   plugins: {
     // The page runs under the status bar (edge to edge) and keeps clear of it itself

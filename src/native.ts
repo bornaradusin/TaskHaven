@@ -1,4 +1,4 @@
-// On the phone: the status bar, the back button, and reminders as notifications.
+// On the phone (Android and iPhone): the status bar, Android's back button, and reminders as notifications.
 import { Capacitor } from '@capacitor/core'
 import { watch } from 'vue'
 import type { Router } from 'vue-router'
@@ -100,7 +100,7 @@ async function schedule(): Promise<void> {
       if (at.getTime() > now && at.getTime() < soon) list.push({ id: notificationId(`${task.id}:due`), title: name, body: `Due now · ${p?.title ?? ''}`, at, projectId: task.projectId, taskId: task.id })
     }
   }
-  // Android keeps a limited number; the soonest ones
+  // Phones keep a limited number (an iPhone 64); the soonest ones
   list.sort((a, b) => a.at.getTime() - b.at.getTime())
   const notifications = list.slice(0, 60).map((n) => ({
     id: n.id,

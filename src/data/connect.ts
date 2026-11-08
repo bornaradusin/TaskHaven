@@ -40,7 +40,7 @@ export async function makeBackend(): Promise<Backend | null> {
   }
 }
 
-/** How requests go: through Android on the phone (see http.ts), the browser's own otherwise. */
+/** How requests go: through the phone itself in the app (see http.ts), the browser's own otherwise. */
 async function fetcher(): Promise<typeof fetch> {
   if (!Capacitor.isNativePlatform()) return (...a) => fetch(...a)
   return (await import('./http')).nativeFetch

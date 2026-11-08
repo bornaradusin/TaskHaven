@@ -5,6 +5,8 @@ import { useRoute } from 'vue-router'
 import Sidebar from '@/ui/Sidebar.vue'
 import TopBar from '@/ui/TopBar.vue'
 import Toasts from '@/ui/Toasts.vue'
+import UpdateDialog from '@/ui/UpdateDialog.vue'
+import { checkNowAndThen, updates } from '@/update'
 import Logo from '@/ui/Logo.vue'
 import SetupView from '@/views/SetupView.vue'
 import AuthView from '@/views/AuthView.vue'
@@ -21,6 +23,7 @@ async function start() {
 }
 
 onMounted(start)
+onMounted(checkNowAndThen)
 watch(
   () => route.fullPath,
   () => (store.menuOpen = false),
@@ -46,6 +49,7 @@ watch(
     </div>
   </div>
   <Toasts />
+  <UpdateDialog v-if="updates.open" />
 </template>
 
 <style scoped>

@@ -2,7 +2,7 @@
 // Settings: you, how it looks, quick add, notifications, the server, the account.
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Filter, KeyRound, LogOut, RefreshCw, Trash2 } from 'lucide-vue-next'
+import { Download, Filter, KeyRound, LogOut, RefreshCw, Trash2 } from 'lucide-vue-next'
 import Modal from '@/ui/Modal.vue'
 import { chooseDemo, demoChosen, saveServer } from '@/data/connect'
 import { native } from '@/native'
@@ -10,6 +10,7 @@ import { DELETE_URL, PRIVACY_URL, REPORT_URL, TERMS_URL } from '@/links'
 import { attempt, cancelDeletion, canEdit, changePassword, disconnect, refresh, requestDeletion, saveSettings, signOut, store, succeeded, updateProfile } from '@/state'
 import { formatDateTime } from '@/logic/dates'
 import type { Settings } from '@/model'
+import { checkForUpdate, setAutoCheck, updatable, updates } from '@/update'
 
 const router = useRouter()
 const name = ref(store.user?.name ?? '')
@@ -154,6 +155,21 @@ const options = computed(() => store.projects.filter((p) => canEdit(p)))
         <button class="button ghost small" @click="switchServer">Use another server</button>
       </div>
       <p class="help">The app checks the server every minute or so while it’s open, and whenever you come back to it.</p>
+    </section>
+
+    <section v-if="updatable" class="card card-body">
+      <h2>Updates</h2>
+      <label class="switch"><input type="checkbox" :checked="updates.auto" @change="setAutoCheck(($event.target as HTMLInputElement).checked)" /> Check for updates</label>
+      <div class="row wrap">
+        <button v-if="updates.step === 'ready' && updates.update" class="button small" @click="updates.open = true"><Download :size="15" /> Update to {{ updates.update.version }}</button>
+        <button v-else class="button secondary small" :disabled="updates.step === 'checking'" @click="checkForUpdate(true)">
+          <RefreshCw :size="15" /> {{ updates.step === 'checking' ? 'Looking…' : 'Check now' }}
+        </button>
+      </div>
+      <p class="help">
+        TaskHaven looks on GitHub about once a day and offers a newer version, with what’s new.
+        You have {{ version }}.
+      </p>
     </section>
 
     <section v-if="store.user?.deletionAt" class="card card-body due">

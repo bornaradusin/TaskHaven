@@ -23,7 +23,8 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Playwright's browsers need an Ubuntu it supports (not yet 26.04, ubuntu-latest's)
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,7 +41,7 @@ jobs:
 
   server:
     # the app against a real Vikunja server: its release (checked against its checksum), with SQLite
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       VIKUNJA_VERSION: v2.7.1
       VIKUNJA_SHA256: 2d0b64a477341977958067a42a32655b74f5e72e6eb02f57942faa19d9ee76ad
